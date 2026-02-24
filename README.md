@@ -2,7 +2,9 @@
 
 Build consistent habits through intelligent tracking, streak mechanics, and behavioral insights. A modern, mobile-first habit tracking application with AI-powered features.
 
-![Habit Tracker Preview](docs/Habit%20Tracker%20-%20Monochrome%20Type.png)
+<p align="center">
+  <img src="docs/Habit%20Tracker%20-%20Monochrome%20Type.png" alt="Habit Tracker Preview" width="800">
+</p>
 
 ## ✨ Features
 
