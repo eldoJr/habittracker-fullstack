@@ -18,6 +18,41 @@ export interface FrequencyConfig {
 export interface Database {
   public: {
     Tables: {
+      user_profiles: {
+        Row: {
+          id: string
+          full_name: string | null
+          date_of_birth: string | null
+          gender: string | null
+          timezone: string
+          avatar_url: string | null
+          bio: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id: string
+          full_name?: string | null
+          date_of_birth?: string | null
+          gender?: string | null
+          timezone?: string
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          full_name?: string | null
+          date_of_birth?: string | null
+          gender?: string | null
+          timezone?: string
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+      }
       habits: {
         Row: {
           id: string

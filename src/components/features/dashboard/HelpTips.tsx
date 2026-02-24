@@ -26,18 +26,16 @@ export function HelpTips() {
   const [expanded, setExpanded] = useState<number>(2)
 
   return (
-    <div className="bg-white rounded-2xl border-2 border-gray-200 overflow-hidden">
-      <div className="p-6 pb-4">
-        <h2 className="text-2xl font-bold text-gray-900">Help & Tips</h2>
-      </div>
-
-      <div>
+    <div>
+      <h2 className="text-2xl font-extrabold text-gray-900 mb-4">Help & Tips</h2>
+      
+      <div className="bg-[#F4F4F5] rounded-2xl overflow-hidden">
         {TIPS.map((tip) => (
           <div key={tip.id}>
             <button
               onClick={() => setExpanded(expanded === tip.id ? 0 : tip.id)}
               className={`w-full px-6 py-4 flex items-center justify-between transition ${
-                expanded === tip.id ? 'bg-gray-900 text-white' : 'hover:bg-gray-50'
+                expanded === tip.id ? 'bg-gray-900 text-white' : 'hover:bg-gray-200'
               }`}
             >
               <span className="font-semibold text-left">{tip.title}</span>

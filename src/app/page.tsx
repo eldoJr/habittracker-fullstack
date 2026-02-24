@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { DashboardHome } from '@/components/features/dashboard/DashboardHome'
+import { getUserProfile } from '@/lib/queries/profile'
 
 export default async function Home() {
   const supabase = await createClient()
@@ -10,5 +11,7 @@ export default async function Home() {
     redirect('/login')
   }
 
-  return <DashboardHome user={user} />
+  const profile = await getUserProfile(user.id)
+
+  return <DashboardHome user={user} profile={profile} />
 }

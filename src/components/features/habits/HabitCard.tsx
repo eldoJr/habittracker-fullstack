@@ -81,64 +81,63 @@ export function HabitCard({ habit, isCompletedToday, streak = 0 }: HabitCardProp
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="bg-white p-6 rounded-xl border-2 transition-all hover:shadow-lg relative"
-        style={{ borderColor: habit.color }}
+        className="bg-[#F4F4F5] p-4 sm:p-6 rounded-2xl relative"
       >
-        <div className="flex items-start justify-between gap-4">
-          <div className="flex-1">
-            <div className="flex items-center gap-3 mb-2">
+        <div className="flex items-start justify-between gap-3 sm:gap-4">
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-3 mb-3">
               <div
-                className="w-12 h-12 rounded-full flex items-center justify-center"
+                className="w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center flex-shrink-0"
                 style={{ backgroundColor: `${habit.color}20` }}
               >
-                <Icon size={24} style={{ color: habit.color }} />
+                <Icon size={20} className="sm:w-6 sm:h-6" style={{ color: habit.color }} />
               </div>
-              <div>
-                <h3 className="font-semibold text-lg text-gray-900">{habit.name}</h3>
-                <Badge variant="gray" className="mt-1">
+              <div className="flex-1 min-w-0">
+                <h3 className="font-bold text-base sm:text-lg text-gray-900 truncate">{habit.name}</h3>
+                <Badge variant="gray" className="mt-1 text-xs">
                   {habit.frequency_type.replace('_', ' ')}
                 </Badge>
               </div>
             </div>
             
             {habit.description && (
-              <p className="text-sm text-gray-600 mb-3 ml-15">{habit.description}</p>
+              <p className="text-xs sm:text-sm text-gray-600 mb-3">{habit.description}</p>
             )}
             
-            <div className="flex items-center gap-4 text-sm ml-15">
+            <div className="flex items-center gap-3 text-xs sm:text-sm">
               <div className="flex items-center gap-1.5">
-                <span className="text-2xl">🔥</span>
-                <span className="font-semibold text-gray-900">{streak}</span>
+                <span className="text-xl sm:text-2xl">🔥</span>
+                <span className="font-bold text-gray-900">{streak}</span>
                 <span className="text-gray-500">day streak</span>
               </div>
             </div>
           </div>
 
-          <div className="flex items-start gap-2">
+          <div className="flex items-start gap-2 flex-shrink-0">
             <div className="relative">
               <button
                 onClick={() => setShowMenu(!showMenu)}
-                className="p-2 hover:bg-gray-100 rounded-lg transition"
+                className="p-2 hover:bg-gray-200 rounded-lg transition"
               >
-                <MoreVertical size={20} />
+                <MoreVertical size={18} />
               </button>
               {showMenu && (
-                <div className="absolute right-0 mt-1 w-40 bg-white rounded-lg shadow-lg border z-10">
+                <div className="absolute right-0 mt-1 w-40 bg-white rounded-xl shadow-lg border z-10">
                   <Link
                     href={`/habits/${habit.id}`}
-                    className="w-full px-4 py-2 hover:bg-gray-50 flex items-center gap-2"
+                    className="w-full px-4 py-2.5 hover:bg-gray-50 flex items-center gap-2 text-sm rounded-t-xl"
                   >
                     <Eye size={16} /> View Details
                   </Link>
                   <button
                     onClick={() => { setShowEdit(true); setShowMenu(false) }}
-                    className="w-full px-4 py-2 text-left hover:bg-gray-50 flex items-center gap-2"
+                    className="w-full px-4 py-2.5 text-left hover:bg-gray-50 flex items-center gap-2 text-sm"
                   >
                     <Edit size={16} /> Edit
                   </button>
                   <button
                     onClick={handleDelete}
-                    className="w-full px-4 py-2 text-left hover:bg-gray-50 flex items-center gap-2 text-red-600"
+                    className="w-full px-4 py-2.5 text-left hover:bg-gray-50 flex items-center gap-2 text-red-600 text-sm rounded-b-xl"
                   >
                     <Trash2 size={16} /> Delete
                   </button>
@@ -150,14 +149,15 @@ export function HabitCard({ habit, isCompletedToday, streak = 0 }: HabitCardProp
               whileTap={{ scale: 0.95 }}
               onClick={toggleComplete}
               disabled={loading}
-              className={`w-14 h-14 rounded-full border-3 transition-all flex items-center justify-center text-xl font-bold ${
+              className={`w-12 h-12 sm:w-14 sm:h-14 rounded-full border-3 transition-all flex items-center justify-center text-lg sm:text-xl font-bold flex-shrink-0 ${
                 completed
-                  ? 'bg-green-500 border-green-500 text-white shadow-lg'
-                  : 'border-gray-300 hover:border-green-500 hover:bg-green-50'
+                  ? 'shadow-md'
+                  : 'border-gray-300 hover:border-gray-400'
               }`}
               style={{
                 borderColor: completed ? habit.color : undefined,
-                backgroundColor: completed ? habit.color : undefined,
+                backgroundColor: completed ? habit.color : '#ffffff',
+                color: completed ? '#ffffff' : habit.color,
               }}
             >
               {completed && '✓'}

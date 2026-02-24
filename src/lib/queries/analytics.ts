@@ -2,21 +2,67 @@ import { createClient } from '@/lib/supabase/server'
 
 export async function getUserStats() {
   const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
   
-  const { data: streaks } = await supabase
-    .from('user_streaks')
-    .select('current_streak')
+  if (!user) return { currentStreak: 0, totalPoints: 0 }
 
+  const today = new Date().toISOString().split('T')[0]
+  const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0]
+  const lastSignIn = user.last_sign_in_at ? new Date(user.last_sign_in_at).toISOString().split('T')[0] : null
+
+  // Get total completions for points (10 points each)
   const { data: completions } = await supabase
     .from('habit_completions')
     .select('id')
+    .eq('user_id', user.id)
 
-  const currentStreak = Math.max(...(streaks?.map(s => s.current_streak) || [0]))
-  const totalPoints = completions?.length || 0
+  const totalPoints = (completions?.length || 0) * 10
+
+  // Calculate streak based on login activity
+  let streak = 0
+  
+  if (lastSignIn === today || lastSignIn === yesterday) {
+    // User is active, get or create streak record
+    const { data: streakData } = await supabase
+      .from('user_streaks')
+      .select('current_streak, last_activity_date')
+      .eq('user_id', user.id)
+      .single()
+
+    if (streakData) {
+      const lastActivity = streakData.last_activity_date
+      const daysSinceActivity = Math.floor((new Date(today).getTime() - new Date(lastActivity).getTime()) / 86400000)
+      
+      if (daysSinceActivity === 0) {
+        // Same day
+        streak = streakData.current_streak
+      } else if (daysSinceActivity === 1) {
+        // Consecutive day
+        streak = streakData.current_streak + 1
+        await supabase
+          .from('user_streaks')
+          .update({ current_streak: streak, last_activity_date: today })
+          .eq('user_id', user.id)
+      } else {
+        // Streak broken, reset to 1
+        streak = 1
+        await supabase
+          .from('user_streaks')
+          .update({ current_streak: 1, last_activity_date: today })
+          .eq('user_id', user.id)
+      }
+    } else {
+      // First time, create streak
+      streak = 1
+      await supabase
+        .from('user_streaks')
+        .insert({ user_id: user.id, current_streak: 1, last_activity_date: today })
+    }
+  }
 
   return {
-    currentStreak,
-    totalPoints,
+    currentStreak: streak,
+    totalPoints: totalPoints,
   }
 }
 

@@ -59,92 +59,100 @@ export function HabitDetailView({ habit, completions, streak }: HabitDetailViewP
   return (
     <>
       <div className="space-y-6">
-        <Card className="p-6">
-          <div className="flex items-start justify-between mb-6">
-            <div className="flex items-center gap-4">
+        {/* Header Card */}
+        <div className="bg-[#F4F4F5] p-4 sm:p-6 rounded-2xl">
+          <div className="flex flex-col sm:flex-row items-start justify-between gap-4 mb-4">
+            <div className="flex items-center gap-3 sm:gap-4 w-full sm:w-auto">
               <div
-                className="w-16 h-16 rounded-full flex items-center justify-center"
+                className="w-12 h-12 sm:w-16 sm:h-16 rounded-full flex items-center justify-center flex-shrink-0"
                 style={{ backgroundColor: `${habit.color}20` }}
               >
-                <Icon size={32} style={{ color: habit.color }} />
+                <Icon size={24} className="sm:w-8 sm:h-8" style={{ color: habit.color }} />
               </div>
-              <div>
-                <h1 className="text-3xl font-bold text-gray-900">{habit.name}</h1>
-                <Badge variant="gray" className="mt-2">
+              <div className="flex-1 min-w-0">
+                <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-900 truncate">{habit.name}</h1>
+                <Badge variant="gray" className="mt-2 text-xs">
                   {habit.frequency_type.replace('_', ' ')}
                 </Badge>
               </div>
             </div>
-            <div className="flex gap-2">
-              <Button variant="outline" size="sm" onClick={() => setShowEdit(true)}>
-                <Edit size={16} className="mr-1" /> Edit
+            <div className="flex gap-2 w-full sm:w-auto">
+              <Button variant="outline" size="sm" onClick={() => setShowEdit(true)} className="flex-1 sm:flex-none">
+                <Edit size={16} className="sm:mr-1" />
+                <span className="hidden sm:inline">Edit</span>
               </Button>
-              <Button variant="ghost" size="sm" onClick={handleArchive}>
-                <Archive size={16} className="mr-1" /> Archive
+              <Button variant="ghost" size="sm" onClick={handleArchive} className="flex-1 sm:flex-none">
+                <Archive size={16} className="sm:mr-1" />
+                <span className="hidden sm:inline">Archive</span>
               </Button>
-              <Button variant="danger" size="sm" onClick={handleDelete}>
-                <Trash2 size={16} className="mr-1" /> Delete
+              <Button variant="danger" size="sm" onClick={handleDelete} className="flex-1 sm:flex-none">
+                <Trash2 size={16} className="sm:mr-1" />
+                <span className="hidden sm:inline">Delete</span>
               </Button>
             </div>
           </div>
 
           {habit.description && (
-            <p className="text-gray-600 mb-6">{habit.description}</p>
+            <p className="text-sm sm:text-base text-gray-600 mb-4">{habit.description}</p>
           )}
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="bg-orange-50 p-4 rounded-lg">
-              <div className="text-3xl mb-1">🔥</div>
-              <div className="text-2xl font-bold text-gray-900">{streak}</div>
-              <div className="text-sm text-gray-600">Day Streak</div>
+          {/* Stats Grid */}
+          <div className="grid grid-cols-2 gap-3 sm:gap-4">
+            <div className="bg-white p-3 sm:p-4 rounded-xl">
+              <div className="text-2xl sm:text-3xl mb-1">🔥</div>
+              <div className="text-xl sm:text-2xl font-bold text-gray-900">{streak}</div>
+              <div className="text-xs sm:text-sm text-gray-600">Day Streak</div>
             </div>
-            <div className="bg-blue-50 p-4 rounded-lg">
-              <div className="text-3xl mb-1">✓</div>
-              <div className="text-2xl font-bold text-gray-900">{totalCompletions}</div>
-              <div className="text-sm text-gray-600">Total Completions</div>
+            <div className="bg-white p-3 sm:p-4 rounded-xl">
+              <div className="text-2xl sm:text-3xl mb-1">✓</div>
+              <div className="text-xl sm:text-2xl font-bold text-gray-900">{totalCompletions}</div>
+              <div className="text-xs sm:text-sm text-gray-600">Completions</div>
             </div>
             {avgMood && (
-              <div className="bg-green-50 p-4 rounded-lg">
-                <div className="text-3xl mb-1">😊</div>
-                <div className="text-2xl font-bold text-gray-900">{avgMood}</div>
-                <div className="text-sm text-gray-600">Avg Mood</div>
+              <div className="bg-white p-3 sm:p-4 rounded-xl">
+                <div className="text-2xl sm:text-3xl mb-1">😊</div>
+                <div className="text-xl sm:text-2xl font-bold text-gray-900">{avgMood}</div>
+                <div className="text-xs sm:text-sm text-gray-600">Avg Mood</div>
               </div>
             )}
             {avgDuration && (
-              <div className="bg-purple-50 p-4 rounded-lg">
-                <div className="text-3xl mb-1">⏱️</div>
-                <div className="text-2xl font-bold text-gray-900">{avgDuration}m</div>
-                <div className="text-sm text-gray-600">Avg Duration</div>
+              <div className="bg-white p-3 sm:p-4 rounded-xl">
+                <div className="text-2xl sm:text-3xl mb-1">⏱️</div>
+                <div className="text-xl sm:text-2xl font-bold text-gray-900">{avgDuration}m</div>
+                <div className="text-xs sm:text-sm text-gray-600">Avg Duration</div>
               </div>
             )}
           </div>
-        </Card>
+        </div>
 
-        <Card className="p-6">
-          <h2 className="text-xl font-bold mb-4">Completion History</h2>
+        {/* History */}
+        <div>
+          <h2 className="text-xl sm:text-2xl font-extrabold mb-4">Completion History</h2>
           {completions.length === 0 ? (
-            <p className="text-gray-500 text-center py-8">No completions yet</p>
+            <div className="bg-[#F4F4F5] p-8 rounded-2xl text-center">
+              <p className="text-gray-500">No completions yet</p>
+            </div>
           ) : (
             <div className="space-y-3">
               {completions.map((completion) => (
                 <div
                   key={completion.id}
-                  className="flex items-center justify-between p-4 bg-gray-50 rounded-lg"
+                  className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 bg-[#F4F4F5] rounded-2xl gap-2"
                 >
-                  <div>
-                    <div className="font-semibold text-gray-900">
+                  <div className="flex-1 min-w-0">
+                    <div className="font-bold text-sm sm:text-base text-gray-900">
                       {format(parseISO(completion.completed_date), 'MMMM d, yyyy')}
                     </div>
                     {completion.notes && (
-                      <p className="text-sm text-gray-600 mt-1">{completion.notes}</p>
+                      <p className="text-xs sm:text-sm text-gray-600 mt-1 line-clamp-2">{completion.notes}</p>
                     )}
                   </div>
-                  <div className="flex items-center gap-4 text-sm">
+                  <div className="flex items-center gap-3 text-sm">
                     {completion.duration && (
-                      <span className="text-gray-600">{completion.duration}m</span>
+                      <span className="text-gray-600 font-medium">{completion.duration}m</span>
                     )}
                     {completion.mood_score && (
-                      <span className="text-xl">
+                      <span className="text-xl sm:text-2xl">
                         {['😞', '😕', '😐', '🙂', '😄'][completion.mood_score - 1]}
                       </span>
                     )}
@@ -153,7 +161,7 @@ export function HabitDetailView({ habit, completions, streak }: HabitDetailViewP
               ))}
             </div>
           )}
-        </Card>
+        </div>
       </div>
 
       {showEdit && (

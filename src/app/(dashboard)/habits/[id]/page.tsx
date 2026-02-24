@@ -20,13 +20,13 @@ export default async function HabitDetailPage({ params }: { params: { id: string
 
     return (
       <main className="min-h-screen bg-gray-50 pb-24">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <Link href="/habits" className="inline-flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-6">
+        <div className="max-w-2xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
+          <Link href="/habits" className="inline-flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-6 font-medium">
             <ArrowLeft size={20} />
             Back to Habits
           </Link>
 
-          <Suspense fallback={<div>Loading...</div>}>
+          <Suspense fallback={<div className="text-center py-8 text-gray-500">Loading...</div>}>
             <HabitDetailView 
               habit={habit} 
               completions={completions}

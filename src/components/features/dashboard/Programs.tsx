@@ -1,6 +1,5 @@
 'use client'
 
-import { useState } from 'react'
 import Link from 'next/link'
 
 const PROGRAMS = [
@@ -21,8 +20,6 @@ const PROGRAMS = [
 ]
 
 export function Programs() {
-  const [activeTab, setActiveTab] = useState<'today' | 'week' | 'month'>('today')
-
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
@@ -53,23 +50,6 @@ export function Programs() {
               </p>
             </div>
           </div>
-        ))}
-      </div>
-
-      {/* Tab Navigation */}
-      <div className="flex gap-2 mt-4">
-        {(['today', 'week', 'month'] as const).map((tab) => (
-          <button
-            key={tab}
-            onClick={() => setActiveTab(tab)}
-            className={`px-6 py-2 rounded-full text-sm font-semibold transition ${
-              activeTab === tab
-                ? 'bg-gray-900 text-white'
-                : 'bg-white text-gray-600 border-2 border-gray-200 hover:border-gray-300'
-            }`}
-          >
-            {tab.charAt(0).toUpperCase() + tab.slice(1)}
-          </button>
         ))}
       </div>
     </div>
