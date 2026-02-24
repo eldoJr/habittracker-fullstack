@@ -8,7 +8,6 @@ import toast from 'react-hot-toast'
 import { Badge } from '@/components/atoms/Badge'
 import { completeHabit, uncompleteHabit, deleteHabit } from '@/lib/actions/habits'
 import { HABIT_ICONS, type IconName } from '@/lib/constants/icons'
-import { EditHabitModal } from './EditHabitModal'
 import { CompletionModal } from './CompletionModal'
 import type { Database } from '@/types/database-production'
 
@@ -24,7 +23,6 @@ export function HabitCard({ habit, isCompletedToday, streak = 0 }: HabitCardProp
   const [loading, setLoading] = useState(false)
   const [completed, setCompleted] = useState(isCompletedToday)
   const [showMenu, setShowMenu] = useState(false)
-  const [showEdit, setShowEdit] = useState(false)
   const [showCompletion, setShowCompletion] = useState(false)
 
   const Icon = HABIT_ICONS[(habit.icon as IconName) || 'target']
@@ -129,12 +127,12 @@ export function HabitCard({ habit, isCompletedToday, streak = 0 }: HabitCardProp
                   >
                     <Eye size={16} /> View Details
                   </Link>
-                  <button
-                    onClick={() => { setShowEdit(true); setShowMenu(false) }}
-                    className="w-full px-4 py-2.5 text-left hover:bg-gray-50 flex items-center gap-2 text-sm"
+                  <Link
+                    href={`/habits/${habit.id}/edit`}
+                    className="w-full px-4 py-2.5 hover:bg-gray-50 flex items-center gap-2 text-sm"
                   >
                     <Edit size={16} /> Edit
-                  </button>
+                  </Link>
                   <button
                     onClick={handleDelete}
                     className="w-full px-4 py-2.5 text-left hover:bg-gray-50 flex items-center gap-2 text-red-600 text-sm rounded-b-xl"
@@ -165,13 +163,6 @@ export function HabitCard({ habit, isCompletedToday, streak = 0 }: HabitCardProp
           </div>
         </div>
       </motion.div>
-
-      {showEdit && (
-        <EditHabitModal
-          habit={habit}
-          onClose={() => setShowEdit(false)}
-        />
-      )}
 
       {showCompletion && (
         <CompletionModal

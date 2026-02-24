@@ -4,13 +4,13 @@ import { useState } from 'react'
 import { format, parseISO } from 'date-fns'
 import { Edit, Trash2, Archive } from 'lucide-react'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import toast from 'react-hot-toast'
 import { Badge } from '@/components/atoms/Badge'
 import { Button } from '@/components/atoms/Button'
 import { Card } from '@/components/atoms/Card'
 import { deleteHabit, archiveHabit } from '@/lib/actions/habits'
 import { HABIT_ICONS, type IconName } from '@/lib/constants/icons'
-import { EditHabitModal } from './EditHabitModal'
 import type { Database } from '@/types/database-production'
 
 type Habit = Database['public']['Tables']['habits']['Row']
@@ -23,7 +23,6 @@ interface HabitDetailViewProps {
 }
 
 export function HabitDetailView({ habit, completions, streak }: HabitDetailViewProps) {
-  const [showEdit, setShowEdit] = useState(false)
   const router = useRouter()
   const Icon = HABIT_ICONS[(habit.icon as IconName) || 'target']
 
@@ -77,10 +76,12 @@ export function HabitDetailView({ habit, completions, streak }: HabitDetailViewP
               </div>
             </div>
             <div className="flex gap-2 w-full sm:w-auto">
-              <Button variant="outline" size="sm" onClick={() => setShowEdit(true)} className="flex-1 sm:flex-none">
-                <Edit size={16} className="sm:mr-1" />
-                <span className="hidden sm:inline">Edit</span>
-              </Button>
+              <Link href={`/habits/${habit.id}/edit`} className="flex-1 sm:flex-none">
+                <Button variant="outline" size="sm" className="w-full">
+                  <Edit size={16} className="sm:mr-1" />
+                  <span className="hidden sm:inline">Edit</span>
+                </Button>
+              </Link>
               <Button variant="ghost" size="sm" onClick={handleArchive} className="flex-1 sm:flex-none">
                 <Archive size={16} className="sm:mr-1" />
                 <span className="hidden sm:inline">Archive</span>
@@ -163,10 +164,6 @@ export function HabitDetailView({ habit, completions, streak }: HabitDetailViewP
           )}
         </div>
       </div>
-
-      {showEdit && (
-        <EditHabitModal habit={habit} onClose={() => setShowEdit(false)} />
-      )}
     </>
   )
 }

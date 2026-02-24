@@ -68,6 +68,13 @@ export async function DashboardHome({ user, profile }: { user: User; profile: Us
           <Suspense fallback={<SkeletonList />}>
             <TodayHabits habits={todayHabits} completedToday={completedToday} />
           </Suspense>
+
+          <Link
+            href="/habits"
+            className="mt-4 w-full py-3 bg-[#F4F4F5] text-gray-900 font-semibold rounded-2xl hover:bg-gray-200 transition text-center block"
+          >
+            Manage Habits
+          </Link>
         </div>
 
         {/* This Week Progress */}
