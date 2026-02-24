@@ -4,6 +4,7 @@ import { logout } from '@/lib/actions/auth'
 import { BottomNav } from '@/components/features/dashboard/BottomNav'
 import { getUserProfile, calculateAge } from '@/lib/queries/profile'
 import { ProfileView } from '@/components/features/profile/ProfileView'
+import { SettingsView } from '@/components/features/profile/SettingsView'
 import { LogOut } from 'lucide-react'
 import { Button } from '@/components/atoms/Button'
 
@@ -23,20 +24,7 @@ export default async function ProfilePage() {
 
         <ProfileView user={user} profile={profile} age={age} />
 
-        <div>
-          <h3 className="text-xl sm:text-2xl font-extrabold text-gray-900 mb-4">Settings</h3>
-          <div className="bg-[#F4F4F5] rounded-2xl overflow-hidden">
-            <button className="w-full text-left px-4 sm:px-6 py-3 sm:py-4 hover:bg-gray-200 transition font-semibold text-gray-900 text-sm sm:text-base">
-              Notifications
-            </button>
-            <button className="w-full text-left px-4 sm:px-6 py-3 sm:py-4 hover:bg-gray-200 transition font-semibold text-gray-900 text-sm sm:text-base">
-              Preferences
-            </button>
-            <button className="w-full text-left px-4 sm:px-6 py-3 sm:py-4 hover:bg-gray-200 transition font-semibold text-gray-900 text-sm sm:text-base">
-              Data Export
-            </button>
-          </div>
-        </div>
+        <SettingsView />
 
         <form action={logout}>
           <Button variant="danger" className="w-full">
