@@ -1,12 +1,12 @@
-# Habit Tracker - Full Stack MVP
+# Habit Tracker - Full Stack
 
 Build consistent habits through intelligent tracking, streak mechanics, and behavioral insights. A modern, mobile-first habit tracking application with AI-powered features.
 
 <p align="center">
-  <img src="docs/Habit%20Tracker%20-%20Monochrome%20Type.png" alt="Habit Tracker Preview" width="800">
+  <img src="public/images/preview.png" alt="Habit Tracker Preview" width="402" height="auto">
 </p>
 
-## ✨ Features
+## Features
 
 ### Core Features
 - ✅ **User Authentication** - Email + OAuth with Supabase Auth
@@ -18,12 +18,6 @@ Build consistent habits through intelligent tracking, streak mechanics, and beha
 - ✅ **Profile Management** - User profiles with customizable settings
 - ✅ **Data Export** - Export all data as JSON or CSV
 - ✅ **Schedule System** - Daily/weekly/monthly event planning
-
-### Design Features
-- 🎨 **Mobile-First Design** - Optimized for mobile with responsive desktop views
-- 🎨 **Consistent Design System** - `#F4F4F5` backgrounds, `rounded-2xl` styling, gray-900 theme
-- 🎨 **Smooth Animations** - Framer Motion for delightful interactions
-- 🎨 **Bottom Navigation** - Floating nav bar for easy access
 
 ### AI & Future Features
 - 🤖 **AI-Powered Insights** - Personalized recommendations (Coming Soon)
@@ -48,26 +42,6 @@ Build consistent habits through intelligent tracking, streak mechanics, and beha
 │  • Row Level Security               │
 └─────────────────────────────────────┘
 ```
-
-**Frontend:**
-- Next.js 14 (App Router)
-- TypeScript
-- Tailwind CSS
-- Framer Motion
-- Lucide Icons
-- React Hot Toast
-
-**Backend:**
-- Supabase (PostgreSQL)
-- Row Level Security (RLS)
-- Server Actions
-- API Routes
-
-## 🚀 Quick Start
-
-### Prerequisites
-- Node.js 18+
-- Supabase account
 
 ### Installation
 
@@ -154,52 +128,6 @@ src/
 - `habit_templates` - Pre-built habit templates
 - `schedule_events` - User schedule/calendar
 
-### Key Features
-- ✅ Monthly partitioned tables for scalability
-- ✅ Row Level Security (RLS) policies
-- ✅ Optimized indexes for performance
-- ✅ Materialized views for analytics
-
-## 🎨 Design System
-
-### Colors
-- Background: `#F4F4F5`
-- Primary: `gray-900` (#111827)
-- Accent: Custom per habit
-
-### Border Radius
-- Cards: `rounded-2xl` (16px)
-- Buttons: `rounded-2xl` (16px)
-- Nav: `rounded-[32px]` (32px)
-
-### Typography
-- Headers: `font-extrabold`
-- Body: `font-semibold` / `font-medium`
-
-## 📱 Pages
-
-1. **Home Dashboard** - Daily overview with stats, habits, schedule
-2. **Habits** - Full habit list with CRUD operations
-3. **Analytics** - Charts, insights, and progress tracking
-4. **Discover** - AI-powered habit templates and recommendations
-5. **Profile** - User settings, notifications, data export
-
-## 🔐 Authentication
-
-- Email/Password authentication
-- OAuth providers (Google, GitHub)
-- Email verification
-- Password reset flow
-- Protected routes with middleware
-
-## 📊 Analytics Features
-
-- Current & longest streak tracking
-- 7-day activity visualization
-- Completion rate calculation
-- Best performing habit identification
-- Most productive day analysis
-- Average mood tracking
 
 ## 🚧 Roadmap
 
