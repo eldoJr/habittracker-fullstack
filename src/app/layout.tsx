@@ -9,7 +9,7 @@ export const metadata: Metadata = {
   title: 'Habit Tracker',
   description: 'Build consistent habits through intelligent tracking',
   icons: {
-    icon: '/images/icon.png',
+    icon: '/icons/icon.png',
   },
 }
 

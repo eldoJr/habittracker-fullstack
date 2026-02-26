@@ -95,7 +95,6 @@ export default function RegisterPage() {
       
       if (!result.success) {
         toast.error(result.message, { id: loadingToast, icon: <AlertCircle size={20} /> })
-        setLoading(false)
       } else {
         if (result.error === 'EMAIL_CONFIRMATION_REQUIRED') {
           toast.success(result.message, { 
@@ -108,37 +107,39 @@ export default function RegisterPage() {
             id: loadingToast,
             icon: <CheckCircle2 size={20} />
           })
+          window.location.href = '/'
+          return
         }
       }
     } catch (error) {
-      toast.dismiss(loadingToast)
+      toast.error('Something went wrong', { id: loadingToast })
+    } finally {
       setLoading(false)
     }
   }
 
   return (
-    <AuthLayout title="Create Account" subtitle={`Step ${step} of 3`}>
+    <AuthLayout title="Create Account">
       {/* Progress Bar */}
       <div className="mb-8">
-        <div className="flex justify-between mb-4">
+        <div className="flex justify-center items-center mb-4 gap-2">
           {STEPS.map((s, idx) => (
-            <div key={s.id} className="flex items-center flex-1">
+            <div key={s.id} className="flex items-center">
               <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold transition-all ${
-                step > s.id ? 'bg-gray-900 text-white scale-100' :
+                step > s.id ? 'bg-gray-900 text-white' :
                 step === s.id ? 'bg-gray-900 text-white scale-110' :
-                'bg-gray-200 text-gray-400 scale-100'
+                'bg-gray-200 text-gray-400'
               }`}>
                 {step > s.id ? <Check size={20} /> : s.id}
               </div>
               {idx < STEPS.length - 1 && (
-                <div className={`flex-1 h-1 mx-2 transition-all ${
+                <div className={`w-12 h-1 mx-1 transition-all ${
                   step > s.id ? 'bg-gray-900' : 'bg-gray-200'
                 }`} />
               )}
             </div>
           ))}
         </div>
-        <p className="text-sm text-gray-600 text-center font-medium">{STEPS[step - 1].description}</p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">

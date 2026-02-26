@@ -1,4 +1,7 @@
-import { InputHTMLAttributes, forwardRef, ReactNode } from 'react'
+'use client'
+
+import { InputHTMLAttributes, forwardRef, ReactNode, useState } from 'react'
+import { Eye, EyeOff } from 'lucide-react'
 import { cn } from '@/lib/utils/cn'
 
 interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
@@ -8,11 +11,15 @@ interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
 }
 
 export const Input = forwardRef<HTMLInputElement, InputProps>(
-  ({ className, label, error, icon, ...props }, ref) => {
+  ({ className, label, error, icon, type, ...props }, ref) => {
+    const [showPassword, setShowPassword] = useState(false)
+    const isPassword = type === 'password'
+    const inputType = isPassword && showPassword ? 'text' : type
+
     return (
       <div className="w-full">
         {label && (
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label className="block text-sm font-semibold text-gray-900 mb-2">
             {label}
           </label>
         )}
@@ -24,14 +31,25 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
           )}
           <input
             className={cn(
-              'w-full py-2.5 border rounded-lg focus:ring-2 focus:ring-gray-900 focus:border-transparent transition',
-              icon ? 'pl-10 pr-4' : 'px-4',
-              error ? 'border-red-500 focus:ring-red-500' : 'border-gray-300',
+              'w-full py-3 border rounded-xl focus:ring-2 focus:ring-gray-900 focus:border-transparent transition bg-[#F4F4F5] border-gray-200',
+              icon ? 'pl-10' : 'pl-4',
+              isPassword ? 'pr-10' : 'pr-4',
+              error ? 'border-red-500 focus:ring-red-500' : '',
               className
             )}
+            type={inputType}
             ref={ref}
             {...props}
           />
+          {isPassword && (
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition"
+            >
+              {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+            </button>
+          )}
         </div>
         {error && (
           <p className="mt-1.5 text-sm text-red-600 flex items-center gap-1">

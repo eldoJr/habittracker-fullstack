@@ -1,4 +1,5 @@
 import { ReactNode } from 'react'
+import Image from 'next/image'
 
 interface AuthLayoutProps {
   children: ReactNode
@@ -8,21 +9,26 @@ interface AuthLayoutProps {
 
 export function AuthLayout({ children, title, subtitle }: AuthLayoutProps) {
   return (
-    <main className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 via-white to-gray-100 py-12 px-4">
-      <div className="w-full max-w-md">
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-gray-900 to-gray-700 rounded-2xl mb-4 shadow-lg">
-            <span className="text-3xl">🎯</span>
+    <main className="min-h-screen bg-gray-50 px-6 py-8">
+      <div className="max-w-md mx-auto">
+        <div className="mb-8 text-center">
+          <div className="flex justify-center mb-6">
+            <Image
+              src="/images/logo.jpg"
+              alt="Habit Tracker Logo"
+              width={64}
+              height={64}
+              className="rounded-2xl shadow-lg"
+              priority
+            />
           </div>
-          <h1 className="text-4xl font-black text-gray-900 mb-2 tracking-tight">{title}</h1>
-          {subtitle && <p className="text-gray-600 font-medium">{subtitle}</p>}
+          <h1 className="text-4xl font-extrabold text-gray-900 mb-2 leading-tight">{title}</h1>
+          {subtitle && <p className="text-gray-500">{subtitle}</p>}
         </div>
 
-        <div className="bg-white rounded-2xl border-2 border-gray-200 p-8 shadow-xl">
-          {children}
-        </div>
+        {children}
 
-        <p className="text-center text-xs text-gray-500 mt-6">
+        <p className="text-center text-xs text-gray-400 mt-8">
           By continuing, you agree to our Terms of Service and Privacy Policy
         </p>
       </div>

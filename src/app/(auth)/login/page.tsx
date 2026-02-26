@@ -22,17 +22,21 @@ export default function LoginPage() {
     const formData = new FormData(e.currentTarget)
     const loadingToast = toast.loading('Signing in...')
 
+    console.log('[LOGIN PAGE] Form submitted')
+    console.log('[LOGIN PAGE] Email:', formData.get('email'))
+
     try {
+      console.log('[LOGIN PAGE] Calling login action...')
       const result = await login(formData)
+      console.log('[LOGIN PAGE] Login action returned:', result)
       
-      if (!result.success) {
-        toast.error(result.message, { id: loadingToast, icon: <AlertCircle size={20} /> })
-      } else {
-        toast.success('Welcome back!', { id: loadingToast, icon: <CheckCircle2 size={20} /> })
-      }
+      // If we get here, redirect didn't happen
+      console.error('[LOGIN PAGE] Redirect did not occur, result:', result)
+      toast.error(result?.message || 'Login failed', { id: loadingToast, icon: <AlertCircle size={20} /> })
+      setLoading(false)
     } catch (error) {
-      toast.dismiss(loadingToast)
-    } finally {
+      console.error('[LOGIN PAGE] Login error caught:', error)
+      toast.error('Invalid email or password', { id: loadingToast, icon: <AlertCircle size={20} /> })
       setLoading(false)
     }
   }
