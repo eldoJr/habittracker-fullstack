@@ -17,6 +17,12 @@ export default function ProfilePage() {
   const [profile, setProfile] = useState<any>(null)
   const [loading, setLoading] = useState(true)
 
+  async function handleLogout() {
+    const supabase = createClient()
+    await supabase.auth.signOut()
+    window.location.href = '/login'
+  }
+
   useEffect(() => {
     const supabase = createClient()
     
@@ -61,12 +67,10 @@ export default function ProfilePage() {
 
         <SettingsView />
 
-        <form action={logout}>
-          <Button variant="danger" className="w-full">
-            <LogOut size={20} className="mr-2" />
-            Logout
-          </Button>
-        </form>
+        <Button variant="danger" className="w-full" onClick={handleLogout}>
+          <LogOut size={20} className="mr-2" />
+          Logout
+        </Button>
       </div>
       <BottomNav />
     </main>

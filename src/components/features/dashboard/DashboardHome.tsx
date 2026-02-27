@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Bell, Plus } from 'lucide-react'
+import { Bell, Sparkles } from 'lucide-react'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { TodayHabits } from './TodayHabits'
@@ -22,23 +22,59 @@ export function DashboardHome({ user, profile }: { user: User; profile: UserProf
   const [stats, setStats] = useState({ currentStreak: 0, totalPoints: 0 })
   const [weeklyProgress, setWeeklyProgress] = useState<any[]>([])
   const [scheduleEvents, setScheduleEvents] = useState<any[]>([])
+  const [refreshKey, setRefreshKey] = useState(0)
 
   useEffect(() => {
     const supabase = createClient()
     const today = new Date().toISOString().split('T')[0]
+    const sevenDaysAgo = new Date()
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 6)
+    const sevenDaysAgoStr = sevenDaysAgo.toISOString().split('T')[0]
     
     Promise.all([
       supabase.from('habits').select('*').eq('user_id', user.id),
-      supabase.from('habit_completions').select('habit_id').eq('user_id', user.id).gte('completed_at', today),
-      supabase.from('user_streaks').select('*').eq('user_id', user.id).maybeSingle(),
-      supabase.from('schedule_events').select('*').eq('user_id', user.id).gte('start_time', new Date().toISOString()),
-    ]).then(([habitsRes, completionsRes, streaksRes, scheduleRes]) => {
+      supabase.from('habit_completions').select('habit_id').eq('user_id', user.id).eq('completed_date', today),
+      supabase.from('schedule_events').select('*').eq('user_id', user.id),
+      supabase.from('habit_completions').select('completed_date').eq('user_id', user.id).gte('completed_date', sevenDaysAgoStr).order('completed_date', { ascending: false }),
+    ]).then(([habitsRes, completionsRes, scheduleRes, allCompletionsRes]) => {
       setHabits(habitsRes.data || [])
       setCompletedToday(completionsRes.data?.map(c => c.habit_id) || [])
-      setStats({ currentStreak: streaksRes.data?.current_streak || 0, totalPoints: streaksRes.data?.total_points || 0 })
       setScheduleEvents(scheduleRes.data || [])
+      
+      // Calculate current streak (consecutive days with at least 1 completion)
+      const completionDates = [...new Set(allCompletionsRes.data?.map(c => c.completed_date) || [])].sort().reverse()
+      let currentStreak = 0
+      const todayDate = new Date().toISOString().split('T')[0]
+      const yesterdayDate = new Date(Date.now() - 86400000).toISOString().split('T')[0]
+      
+      if (completionDates.length > 0 && (completionDates[0] === todayDate || completionDates[0] === yesterdayDate)) {
+        let checkDate = completionDates[0]
+        for (let i = 0; i < completionDates.length; i++) {
+          if (completionDates[i] === checkDate) {
+            currentStreak++
+            const prevDate = new Date(checkDate)
+            prevDate.setDate(prevDate.getDate() - 1)
+            checkDate = prevDate.toISOString().split('T')[0]
+          } else {
+            break
+          }
+        }
+      }
+      
+      const totalPoints = (allCompletionsRes.data?.length || 0) * 10
+      setStats({ currentStreak, totalPoints })
+      
+      // Calculate weekly progress
+      const weekData = Array.from({ length: 7 }, (_, i) => {
+        const date = new Date()
+        date.setDate(date.getDate() - (6 - i))
+        const dateStr = date.toISOString().split('T')[0]
+        const count = allCompletionsRes.data?.filter(c => c.completed_date === dateStr).length || 0
+        return { date: dateStr, count }
+      })
+      setWeeklyProgress(weekData)
     })
-  }, [user.id])
+  }, [user.id, refreshKey])
 
   const firstName = profile?.full_name?.split(' ')[0] || user.email?.split('@')[0] || 'there'
   const todayHabits = habits.filter(h => !h.archived_at)
@@ -81,7 +117,7 @@ export function DashboardHome({ user, profile }: { user: User; profile: UserProf
             <span className="text-lg text-gray-500">{completedCount}/{todayHabits.length}</span>
           </div>
 
-          <TodayHabits habits={todayHabits} completedToday={completedToday} />
+          <TodayHabits habits={todayHabits} completedToday={completedToday} onComplete={() => setRefreshKey(k => k + 1)} />
 
           <Link
             href="/habits"
@@ -103,10 +139,10 @@ export function DashboardHome({ user, profile }: { user: User; profile: UserProf
 
         {/* Floating Action Button */}
         <Link
-          href="/habits"
-          className="fixed bottom-24 right-8 w-14 h-14 bg-gray-900 text-white rounded-full flex items-center justify-center shadow-lg hover:bg-gray-800 transition z-40"
+          href="/coach"
+          className="fixed bottom-24 right-8 w-14 h-14 bg-gradient-to-br from-purple-600 to-blue-600 text-white rounded-full flex items-center justify-center shadow-lg hover:scale-110 transition z-40"
         >
-          <Plus size={24} />
+          <Sparkles size={24} />
         </Link>
       </div>
 

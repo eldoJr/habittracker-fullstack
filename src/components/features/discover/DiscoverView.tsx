@@ -2,7 +2,7 @@
 
 import { Sparkles, TrendingUp, Brain, Zap, Dumbbell, Book, Moon, Sun } from 'lucide-react'
 import { useState } from 'react'
-import { applyTemplate } from '@/lib/actions/templates'
+import { createClient } from '@/lib/supabase/client'
 import toast from 'react-hot-toast'
 import { useRouter } from 'next/navigation'
 
@@ -60,7 +60,23 @@ export function DiscoverView({ templates }: { templates: Template[] }) {
   async function handleApplyTemplate(templateId: string) {
     setLoading(templateId)
     try {
-      await applyTemplate(templateId)
+      const supabase = createClient()
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) return
+
+      const { data: template } = await supabase.from('habit_templates').select('*').eq('id', templateId).single()
+      if (!template) throw new Error('Template not found')
+
+      const habits = template.habits.map((habit: any) => ({
+        user_id: session.user.id,
+        name: habit,
+        frequency_type: 'daily',
+        frequency_config: {},
+        color: template.color,
+        icon: template.icon,
+      }))
+
+      await supabase.from('habits').insert(habits)
       toast.success('Habits created successfully!')
       router.push('/habits')
     } catch (error) {

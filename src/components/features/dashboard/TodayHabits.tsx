@@ -1,10 +1,10 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Check, Circle, Clock } from 'lucide-react'
 import { motion } from 'framer-motion'
+import { createClient } from '@/lib/supabase/client'
 import toast from 'react-hot-toast'
-import { completeHabit, uncompleteHabit } from '@/lib/actions/habits'
 import type { Database } from '@/types/database-production'
 
 type Habit = Database['public']['Tables']['habits']['Row']
@@ -12,26 +12,51 @@ type Habit = Database['public']['Tables']['habits']['Row']
 interface TodayHabitsProps {
   habits: Habit[]
   completedToday: string[]
+  onComplete?: () => void
 }
 
-export function TodayHabits({ habits, completedToday }: TodayHabitsProps) {
+export function TodayHabits({ habits, completedToday, onComplete }: TodayHabitsProps) {
   const [completed, setCompleted] = useState<Set<string>>(new Set(completedToday))
   const [loading, setLoading] = useState<string | null>(null)
+
+  // Sync with prop changes
+  useEffect(() => {
+    setCompleted(new Set(completedToday))
+  }, [completedToday])
 
   async function toggleHabit(habitId: string) {
     setLoading(habitId)
     try {
+      const supabase = createClient()
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) return
+
+      const today = new Date().toISOString().split('T')[0]
+
       if (completed.has(habitId)) {
-        await uncompleteHabit(habitId, new Date().toISOString().split('T')[0])
+        await supabase.from('habit_completions').delete().eq('habit_id', habitId).eq('user_id', session.user.id).eq('completed_date', today)
         setCompleted(prev => {
           const next = new Set(prev)
           next.delete(habitId)
           return next
         })
       } else {
-        await completeHabit(habitId)
+        const { error } = await supabase.from('habit_completions').insert({
+          habit_id: habitId,
+          user_id: session.user.id,
+          completed_date: today,
+        })
+        if (error) {
+          if (error.code === '23505') {
+            toast.error('Already completed today')
+          } else {
+            throw error
+          }
+          return
+        }
         setCompleted(prev => new Set(prev).add(habitId))
         toast.success('Great job! 🎉')
+        onComplete?.()
       }
     } catch (error) {
       toast.error('Something went wrong')

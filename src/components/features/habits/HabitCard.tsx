@@ -35,7 +35,7 @@ export function HabitCard({ habit, isCompletedToday, streak = 0 }: HabitCardProp
     if (completed) {
       setLoading(true)
       try {
-        await supabase.from('habit_completions').delete().eq('habit_id', habit.id).eq('user_id', session.user.id).gte('completed_at', new Date().toISOString().split('T')[0])
+        await supabase.from('habit_completions').delete().eq('habit_id', habit.id).eq('user_id', session.user.id).gte('completed_date', new Date().toISOString().split('T')[0])
         setCompleted(false)
         toast.success('Habit uncompleted')
       } catch (error) {
@@ -59,7 +59,7 @@ export function HabitCard({ habit, isCompletedToday, streak = 0 }: HabitCardProp
       await supabase.from('habit_completions').insert({
         habit_id: habit.id,
         user_id: session.user.id,
-        completed_at: new Date().toISOString(),
+        completed_date: new Date().toISOString().split('T')[0],
         duration_minutes: data?.duration,
         notes: data?.notes,
         mood_score: data?.mood_score,

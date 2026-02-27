@@ -59,12 +59,15 @@ export function AddScheduleModal({ onClose }: AddScheduleModalProps) {
         return
       }
 
+      const startTime = formData.get('startTime') as string
+      const endTime = formData.get('endTime') as string
+
       const { error } = await supabase.from('schedule_events').insert({
         user_id: session.user.id,
         title: formData.get('title') as string,
         event_type: selectedType,
-        start_time: new Date().toISOString().split('T')[0] + 'T' + formData.get('startTime'),
-        end_time: formData.get('endTime') ? new Date().toISOString().split('T')[0] + 'T' + formData.get('endTime') : null,
+        start_time: startTime,
+        end_time: endTime || null,
         days_of_week: selectedDays,
         color: EVENT_TYPES.find(t => t.value === selectedType)?.color || '#000000',
       })
@@ -84,16 +87,16 @@ export function AddScheduleModal({ onClose }: AddScheduleModalProps) {
   }
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={onClose}>
-      <div className="bg-white rounded-2xl max-w-md w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
-        <div className="sticky top-0 bg-white border-b px-6 py-4 flex justify-between items-center">
-          <h2 className="text-2xl font-bold">Add Schedule</h2>
+    <div className="fixed inset-0 bg-black/50 flex items-end sm:items-center justify-center z-[100] p-0 sm:p-4" onClick={onClose}>
+      <div className="bg-white rounded-t-3xl sm:rounded-2xl max-w-md w-full max-h-[85vh] sm:max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+        <div className="sticky top-0 bg-white border-b px-4 sm:px-6 py-4 flex justify-between items-center rounded-t-3xl sm:rounded-t-2xl">
+          <h2 className="text-xl sm:text-2xl font-bold">Add Schedule</h2>
           <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-lg transition">
             <X size={24} />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+        <form onSubmit={handleSubmit} className="p-4 sm:p-6 space-y-4 pb-6">
           <Input
             name="title"
             label="Title"
@@ -111,7 +114,7 @@ export function AddScheduleModal({ onClose }: AddScheduleModalProps) {
                   key={type.value}
                   type="button"
                   onClick={() => setSelectedType(type.value)}
-                  className={`p-3 rounded-lg border-2 transition ${
+                  className={`p-3 rounded-lg border-2 transition text-sm ${
                     selectedType === type.value
                       ? 'border-gray-900 bg-gray-50'
                       : 'border-gray-200 hover:border-gray-300'
@@ -143,13 +146,13 @@ export function AddScheduleModal({ onClose }: AddScheduleModalProps) {
             <label className="block text-sm font-medium text-gray-700 mb-2">
               Repeat on
             </label>
-            <div className="flex gap-2">
+            <div className="flex gap-2 justify-between">
               {DAYS.map((day) => (
                 <button
                   key={day.value}
                   type="button"
                   onClick={() => toggleDay(day.value)}
-                  className={`w-10 h-10 rounded-full font-bold transition ${
+                  className={`w-10 h-10 rounded-full font-bold transition text-sm ${
                     selectedDays.includes(day.value)
                       ? 'bg-gray-900 text-white'
                       : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
