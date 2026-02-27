@@ -1,21 +1,56 @@
-import { redirect } from 'next/navigation'
-import { createClient } from '@/lib/supabase/server'
+'use client'
+
+import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { createClient } from '@/lib/supabase/client'
 import { logout } from '@/lib/actions/auth'
 import { BottomNav } from '@/components/features/dashboard/BottomNav'
-import { getUserProfile, calculateAge } from '@/lib/queries/profile'
 import { ProfileView } from '@/components/features/profile/ProfileView'
 import { SettingsView } from '@/components/features/profile/SettingsView'
 import { LogOut } from 'lucide-react'
 import { Button } from '@/components/atoms/Button'
+import type { User } from '@supabase/supabase-js'
 
-export default async function ProfilePage() {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  
-  if (!user) redirect('/login')
+export default function ProfilePage() {
+  const router = useRouter()
+  const [user, setUser] = useState<User | null>(null)
+  const [profile, setProfile] = useState<any>(null)
+  const [loading, setLoading] = useState(true)
 
-  const profile = await getUserProfile(user.id)
-  const age = profile?.date_of_birth ? await calculateAge(profile.date_of_birth) : null
+  useEffect(() => {
+    const supabase = createClient()
+    
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!session) {
+        router.push('/login')
+        return
+      }
+      
+      setUser(session.user)
+      
+      supabase
+        .from('user_profiles')
+        .select('*')
+        .eq('id', session.user.id)
+        .single()
+        .then(({ data }) => {
+          setProfile(data)
+          setLoading(false)
+        })
+    })
+  }, [])
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gray-50">
+        <div className="w-12 h-12 border-4 border-gray-200 border-t-gray-900 rounded-full animate-spin"></div>
+      </div>
+    )
+  }
+
+  if (!user) return null
+
+  const age = profile?.date_of_birth ? Math.floor((Date.now() - new Date(profile.date_of_birth).getTime()) / 31557600000) : null
 
   return (
     <main className="min-h-screen bg-gray-50 pb-24">

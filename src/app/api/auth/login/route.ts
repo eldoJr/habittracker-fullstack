@@ -23,14 +23,11 @@ export async function POST(request: Request) {
     }
   )
 
-  const { data, error } = await supabase.auth.signInWithPassword({
-    email,
-    password,
-  })
+  const { error } = await supabase.auth.signInWithPassword({ email, password })
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 400 })
+    return NextResponse.json({ success: false, error: error.message }, { status: 401 })
   }
 
-  return NextResponse.json({ success: true, user: data.user })
+  return NextResponse.json({ success: true })
 }

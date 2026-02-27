@@ -1,18 +1,35 @@
-import { Suspense } from 'react'
-import { createClient } from '@/lib/supabase/server'
-import { redirect } from 'next/navigation'
+'use client'
+
+import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
 import { ArrowLeft, Plus } from 'lucide-react'
 import { HabitList } from '@/components/features/habits/HabitList'
 import { BottomNav } from '@/components/features/dashboard/BottomNav'
 
-export default async function HabitsPage() {
-  const supabase = await createClient()
-  
-  const { data: { user } } = await supabase.auth.getUser()
-  
-  if (!user) {
-    redirect('/login')
+export default function HabitsPage() {
+  const router = useRouter()
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const supabase = createClient()
+    
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!session) {
+        router.push('/login')
+      } else {
+        setLoading(false)
+      }
+    })
+  }, [])
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gray-50">
+        <div className="w-12 h-12 border-4 border-gray-200 border-t-gray-900 rounded-full animate-spin"></div>
+      </div>
+    )
   }
 
   return (
@@ -30,9 +47,7 @@ export default async function HabitsPage() {
           </Link>
         </div>
 
-        <Suspense fallback={<div className="text-center py-8 text-gray-500">Loading habits...</div>}>
-          <HabitList />
-        </Suspense>
+        <HabitList />
       </div>
       <BottomNav />
     </main>

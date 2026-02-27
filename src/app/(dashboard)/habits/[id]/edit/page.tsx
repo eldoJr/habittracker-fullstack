@@ -1,25 +1,47 @@
-import { createClient } from '@/lib/supabase/server'
-import { redirect } from 'next/navigation'
+'use client'
+
+import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
-import { getHabit } from '@/lib/queries/habits'
 import { EditHabitForm } from '@/components/features/habits/EditHabitForm'
 import { BottomNav } from '@/components/features/dashboard/BottomNav'
 
-export default async function EditHabitPage({ params }: { params: { id: string } }) {
-  const supabase = await createClient()
-  
-  const { data: { user } } = await supabase.auth.getUser()
-  
-  if (!user) {
-    redirect('/login')
+export default function EditHabitPage({ params }: { params: { id: string } }) {
+  const router = useRouter()
+  const [habit, setHabit] = useState<any>(null)
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    const supabase = createClient()
+    
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!session) {
+        router.push('/login')
+        return
+      }
+      
+      supabase.from('habits').select('*').eq('id', params.id).single().then(({ data }) => {
+        if (!data) {
+          router.push('/habits')
+          return
+        }
+        setHabit(data)
+        setLoading(false)
+      })
+    })
+  }, [params.id, router])
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gray-50">
+        <div className="w-12 h-12 border-4 border-gray-200 border-t-gray-900 rounded-full animate-spin"></div>
+      </div>
+    )
   }
 
-  const habit = await getHabit(params.id)
-
-  if (!habit) {
-    redirect('/habits')
-  }
+  if (!habit) return null
 
   return (
     <main className="min-h-screen bg-gray-50 pb-24">

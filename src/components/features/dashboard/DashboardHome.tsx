@@ -1,9 +1,9 @@
-import { Suspense } from 'react'
+'use client'
+
+import { useEffect, useState } from 'react'
 import { Bell, Plus } from 'lucide-react'
 import Link from 'next/link'
-import { getHabits, getTodayCompletions } from '@/lib/queries/habits'
-import { getUserStats, getWeeklyProgress } from '@/lib/queries/analytics'
-import { getTodaySchedule } from '@/lib/queries/schedule'
+import { createClient } from '@/lib/supabase/client'
 import { TodayHabits } from './TodayHabits'
 import { SearchBar } from './SearchBar'
 import { WeekProgress } from './WeekProgress'
@@ -11,18 +11,34 @@ import { Programs } from './Programs'
 import { Schedule } from './Schedule'
 import { HelpTips } from './HelpTips'
 import { BottomNav } from './BottomNav'
-import { SkeletonCard, SkeletonList } from '@/components/atoms/Skeleton'
 import type { User } from '@supabase/supabase-js'
 import type { Database } from '@/types/database-production'
 
 type UserProfile = Database['public']['Tables']['user_profiles']['Row']
 
-export async function DashboardHome({ user, profile }: { user: User; profile: UserProfile | null }) {
-  const habits = await getHabits()
-  const completedToday = await getTodayCompletions()
-  const stats = await getUserStats()
-  const weeklyProgress = await getWeeklyProgress()
-  const scheduleEvents = await getTodaySchedule()
+export function DashboardHome({ user, profile }: { user: User; profile: UserProfile | null }) {
+  const [habits, setHabits] = useState<any[]>([])
+  const [completedToday, setCompletedToday] = useState<string[]>([])
+  const [stats, setStats] = useState({ currentStreak: 0, totalPoints: 0 })
+  const [weeklyProgress, setWeeklyProgress] = useState<any[]>([])
+  const [scheduleEvents, setScheduleEvents] = useState<any[]>([])
+
+  useEffect(() => {
+    const supabase = createClient()
+    const today = new Date().toISOString().split('T')[0]
+    
+    Promise.all([
+      supabase.from('habits').select('*').eq('user_id', user.id),
+      supabase.from('habit_completions').select('habit_id').eq('user_id', user.id).gte('completed_at', today),
+      supabase.from('user_streaks').select('*').eq('user_id', user.id).maybeSingle(),
+      supabase.from('schedule_events').select('*').eq('user_id', user.id).gte('start_time', new Date().toISOString()),
+    ]).then(([habitsRes, completionsRes, streaksRes, scheduleRes]) => {
+      setHabits(habitsRes.data || [])
+      setCompletedToday(completionsRes.data?.map(c => c.habit_id) || [])
+      setStats({ currentStreak: streaksRes.data?.current_streak || 0, totalPoints: streaksRes.data?.total_points || 0 })
+      setScheduleEvents(scheduleRes.data || [])
+    })
+  }, [user.id])
 
   const firstName = profile?.full_name?.split(' ')[0] || user.email?.split('@')[0] || 'there'
   const todayHabits = habits.filter(h => !h.archived_at)
@@ -65,9 +81,7 @@ export async function DashboardHome({ user, profile }: { user: User; profile: Us
             <span className="text-lg text-gray-500">{completedCount}/{todayHabits.length}</span>
           </div>
 
-          <Suspense fallback={<SkeletonList />}>
-            <TodayHabits habits={todayHabits} completedToday={completedToday} />
-          </Suspense>
+          <TodayHabits habits={todayHabits} completedToday={completedToday} />
 
           <Link
             href="/habits"
@@ -78,19 +92,11 @@ export async function DashboardHome({ user, profile }: { user: User; profile: Us
         </div>
 
         {/* This Week Progress */}
-        <Suspense fallback={<SkeletonCard />}>
-          <WeekProgress progress={weeklyProgress} />
-        </Suspense>
+        <WeekProgress progress={weeklyProgress} />
 
-        {/* Programs */}
-        <Suspense fallback={<SkeletonCard />}>
-          <Programs />
-        </Suspense>
+        <Programs />
 
-        {/* Schedule */}
-        <Suspense fallback={<SkeletonCard />}>
-          <Schedule events={scheduleEvents} />
-        </Suspense>
+        <Schedule events={scheduleEvents} />
 
         {/* Help & Tips */}
         <HelpTips />

@@ -2,14 +2,17 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { login, resetPassword } from '@/lib/actions/auth'
+import { useRouter } from 'next/navigation'
+import { createClient } from '@/lib/supabase/client'
+import { resetPassword } from '@/lib/actions/auth'
 import { Input } from '@/components/atoms/Input'
 import { Button } from '@/components/atoms/Button'
 import { AuthLayout } from '@/components/features/auth/AuthLayout'
 import toast from 'react-hot-toast'
-import { Mail, Lock, AlertCircle, CheckCircle2 } from 'lucide-react'
+import { Mail, Lock, AlertCircle } from 'lucide-react'
 
 export default function LoginPage() {
+  const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [showForgotPassword, setShowForgotPassword] = useState(false)
   const [resetEmail, setResetEmail] = useState('')
@@ -18,26 +21,23 @@ export default function LoginPage() {
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
     setLoading(true)
-
-    const formData = new FormData(e.currentTarget)
     const loadingToast = toast.loading('Signing in...')
 
-    console.log('[LOGIN PAGE] Form submitted')
-    console.log('[LOGIN PAGE] Email:', formData.get('email'))
+    const formData = new FormData(e.currentTarget)
+    const supabase = createClient()
+    
+    const { error, data } = await supabase.auth.signInWithPassword({
+      email: formData.get('email') as string,
+      password: formData.get('password') as string,
+    })
 
-    try {
-      console.log('[LOGIN PAGE] Calling login action...')
-      const result = await login(formData)
-      console.log('[LOGIN PAGE] Login action returned:', result)
-      
-      // If we get here, redirect didn't happen
-      console.error('[LOGIN PAGE] Redirect did not occur, result:', result)
-      toast.error(result?.message || 'Login failed', { id: loadingToast, icon: <AlertCircle size={20} /> })
+    if (error) {
+      toast.error(error.message, { id: loadingToast, icon: <AlertCircle size={20} /> })
       setLoading(false)
-    } catch (error) {
-      console.error('[LOGIN PAGE] Login error caught:', error)
-      toast.error('Invalid email or password', { id: loadingToast, icon: <AlertCircle size={20} /> })
-      setLoading(false)
+    } else {
+      toast.success('Login successful!', { id: loadingToast })
+      await new Promise(resolve => setTimeout(resolve, 500))
+      window.location.href = '/'
     }
   }
 
@@ -49,21 +49,17 @@ export default function LoginPage() {
     formData.append('email', resetEmail)
     const loadingToast = toast.loading('Sending reset email...')
 
-    try {
-      const result = await resetPassword(formData)
-      
-      if (result.success) {
-        toast.success(result.message, { id: loadingToast, duration: 5000 })
-        setShowForgotPassword(false)
-        setResetEmail('')
-      } else {
-        toast.error(result.message, { id: loadingToast })
-      }
-    } catch (error) {
-      toast.error('Something went wrong', { id: loadingToast })
-    } finally {
-      setResetLoading(false)
+    const result = await resetPassword(formData)
+    
+    if (result.success) {
+      toast.success(result.message, { id: loadingToast, duration: 5000 })
+      setShowForgotPassword(false)
+      setResetEmail('')
+    } else {
+      toast.error(result.message, { id: loadingToast })
     }
+    
+    setResetLoading(false)
   }
 
   if (showForgotPassword) {

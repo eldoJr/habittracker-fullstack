@@ -2,9 +2,9 @@
 
 import { useState } from 'react'
 import toast from 'react-hot-toast'
+import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/atoms/Button'
 import { Input } from '@/components/atoms/Input'
-import { createHabit, updateHabit } from '@/lib/actions/habits'
 import type { HabitFrequency } from '@/types/database-production'
 import type { Database } from '@/types/database-production'
 import { HABIT_ICONS, ICON_NAMES, type IconName } from '@/lib/constants/icons'
@@ -33,7 +33,16 @@ export function HabitForm({ habit, onSuccess }: HabitFormProps) {
     const description = formData.get('description') as string
 
     try {
+      const supabase = createClient()
+      const { data: { session } } = await supabase.auth.getSession()
+      
+      if (!session) {
+        toast.error('Please log in')
+        return
+      }
+
       const data = {
+        user_id: session.user.id,
         name,
         description: description || null,
         frequency_type: frequency,
@@ -43,10 +52,10 @@ export function HabitForm({ habit, onSuccess }: HabitFormProps) {
       }
 
       if (habit) {
-        await updateHabit(habit.id, data)
+        await supabase.from('habits').update(data).eq('id', habit.id)
         toast.success('Habit updated! ✨')
       } else {
-        await createHabit(data)
+        await supabase.from('habits').insert(data)
         toast.success('Habit created! 🎉')
       }
       

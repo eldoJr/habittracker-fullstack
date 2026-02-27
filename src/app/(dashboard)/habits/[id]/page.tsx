@@ -1,22 +1,55 @@
-import { Suspense } from 'react'
-import { notFound, redirect } from 'next/navigation'
+'use client'
+
+import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
-import { createClient } from '@/lib/supabase/server'
-import { getHabit, getHabitCompletions, getHabitStreak } from '@/lib/queries/habits'
+import { createClient } from '@/lib/supabase/client'
 import { HabitDetailView } from '@/components/features/habits/HabitDetailView'
 import { BottomNav } from '@/components/features/dashboard/BottomNav'
 
-export default async function HabitDetailPage({ params }: { params: { id: string } }) {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-  
-  if (!user) redirect('/login')
+export default function HabitDetailPage({ params }: { params: { id: string } }) {
+  const router = useRouter()
+  const [habit, setHabit] = useState<any>(null)
+  const [completions, setCompletions] = useState<any[]>([])
+  const [streak, setStreak] = useState(0)
+  const [loading, setLoading] = useState(true)
 
-  try {
-    const habit = await getHabit(params.id)
-    const completions = await getHabitCompletions(params.id, 90)
-    const streak = await getHabitStreak(params.id)
+  useEffect(() => {
+    const supabase = createClient()
+    
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!session) {
+        router.push('/login')
+        return
+      }
+      
+      Promise.all([
+        supabase.from('habits').select('*').eq('id', params.id).single(),
+        supabase.from('habit_completions').select('*').eq('habit_id', params.id).order('completed_at', { ascending: false }).limit(90),
+        supabase.from('user_streaks').select('current_streak').eq('user_id', session.user.id).maybeSingle(),
+      ]).then(([habitRes, completionsRes, streakRes]) => {
+        if (!habitRes.data) {
+          router.push('/habits')
+          return
+        }
+        setHabit(habitRes.data)
+        setCompletions(completionsRes.data || [])
+        setStreak(streakRes.data?.current_streak || 0)
+        setLoading(false)
+      })
+    })
+  }, [params.id, router])
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gray-50">
+        <div className="w-12 h-12 border-4 border-gray-200 border-t-gray-900 rounded-full animate-spin"></div>
+      </div>
+    )
+  }
+
+  if (!habit) return null
 
     return (
       <main className="min-h-screen bg-gray-50 pb-24">
@@ -26,18 +59,13 @@ export default async function HabitDetailPage({ params }: { params: { id: string
             Back to Habits
           </Link>
 
-          <Suspense fallback={<div className="text-center py-8 text-gray-500">Loading...</div>}>
-            <HabitDetailView 
-              habit={habit} 
-              completions={completions}
-              streak={streak?.current_streak || 0}
-            />
-          </Suspense>
+          <HabitDetailView 
+            habit={habit} 
+            completions={completions}
+            streak={streak}
+          />
         </div>
         <BottomNav />
       </main>
     )
-  } catch (error) {
-    notFound()
   }
-}

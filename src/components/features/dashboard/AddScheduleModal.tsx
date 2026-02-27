@@ -3,10 +3,10 @@
 import { useState } from 'react'
 import { X, Clock, Calendar } from 'lucide-react'
 import { useRouter } from 'next/navigation'
+import { createClient } from '@/lib/supabase/client'
 import toast from 'react-hot-toast'
 import { Input } from '@/components/atoms/Input'
 import { Button } from '@/components/atoms/Button'
-import { createScheduleEvent } from '@/lib/actions/schedule'
 
 interface AddScheduleModalProps {
   onClose: () => void
@@ -48,21 +48,33 @@ export function AddScheduleModal({ onClose }: AddScheduleModalProps) {
     setLoading(true)
 
     const formData = new FormData(e.currentTarget)
-    formData.append('eventType', selectedType)
-    formData.append('daysOfWeek', JSON.stringify(selectedDays))
-    formData.append('color', EVENT_TYPES.find(t => t.value === selectedType)?.color || '#000000')
-
     const loadingToast = toast.loading('Adding to schedule...')
 
     try {
-      const result = await createScheduleEvent(formData)
+      const supabase = createClient()
+      const { data: { session } } = await supabase.auth.getSession()
       
-      if (result.success) {
+      if (!session) {
+        toast.error('Please log in', { id: loadingToast })
+        return
+      }
+
+      const { error } = await supabase.from('schedule_events').insert({
+        user_id: session.user.id,
+        title: formData.get('title') as string,
+        event_type: selectedType,
+        start_time: new Date().toISOString().split('T')[0] + 'T' + formData.get('startTime'),
+        end_time: formData.get('endTime') ? new Date().toISOString().split('T')[0] + 'T' + formData.get('endTime') : null,
+        days_of_week: selectedDays,
+        color: EVENT_TYPES.find(t => t.value === selectedType)?.color || '#000000',
+      })
+      
+      if (!error) {
         toast.success('Schedule added!', { id: loadingToast })
         router.refresh()
         onClose()
       } else {
-        toast.error(result.error || 'Failed to add', { id: loadingToast })
+        toast.error('Failed to add', { id: loadingToast })
       }
     } catch (error) {
       toast.error('Something went wrong', { id: loadingToast })

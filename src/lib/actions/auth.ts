@@ -11,38 +11,22 @@ type ActionResult = {
 }
 
 export async function login(formData: FormData) {
-  console.log('[AUTH] Login attempt started')
   const supabase = await createClient()
 
   const email = formData.get('email') as string
   const password = formData.get('password') as string
 
-  console.log('[AUTH] Email:', email)
-
   if (!email || !password) {
-    console.log('[AUTH] Validation failed: missing email or password')
-    return { success: false, message: 'Email and password are required', error: 'VALIDATION_ERROR' }
+    throw new Error('Email and password are required')
   }
 
-  console.log('[AUTH] Calling Supabase signInWithPassword...')
-  const { data, error } = await supabase.auth.signInWithPassword({ email, password })
+  const { error } = await supabase.auth.signInWithPassword({ email, password })
 
   if (error) {
-    console.error('[AUTH] Login error:', error.message)
-    if (error.message.includes('Invalid login credentials')) {
-      return { success: false, message: 'Invalid email or password', error: 'INVALID_CREDENTIALS' }
-    }
-    if (error.message.includes('Email not confirmed')) {
-      return { success: false, message: 'Please verify your email first', error: 'EMAIL_NOT_CONFIRMED' }
-    }
-    return { success: false, message: error.message, error: 'AUTH_ERROR' }
+    throw new Error(error.message)
   }
 
-  console.log('[AUTH] Login successful, user ID:', data?.user?.id)
-  console.log('[AUTH] Session exists:', !!data?.session)
-  console.log('[AUTH] Revalidating path...')
   revalidatePath('/', 'layout')
-  console.log('[AUTH] Redirecting to home page...')
   redirect('/')
 }
 

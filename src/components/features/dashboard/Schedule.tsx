@@ -2,8 +2,8 @@
 
 import { useState } from 'react'
 import { Plus, Trash2 } from 'lucide-react'
+import { createClient } from '@/lib/supabase/client'
 import { AddScheduleModal } from './AddScheduleModal'
-import { deleteScheduleEvent } from '@/lib/actions/schedule'
 import toast from 'react-hot-toast'
 import { useRouter } from 'next/navigation'
 
@@ -32,9 +32,10 @@ export function Schedule({ events }: ScheduleProps) {
 
   async function handleDelete(eventId: string) {
     setDeleting(eventId)
-    const result = await deleteScheduleEvent(eventId)
+    const supabase = createClient()
+    const { error } = await supabase.from('schedule_events').delete().eq('id', eventId)
     
-    if (result.success) {
+    if (!error) {
       toast.success('Deleted!')
       router.refresh()
     } else {

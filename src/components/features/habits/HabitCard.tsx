@@ -5,8 +5,8 @@ import { motion } from 'framer-motion'
 import { MoreVertical, Edit, Trash2, Eye } from 'lucide-react'
 import Link from 'next/link'
 import toast from 'react-hot-toast'
+import { createClient } from '@/lib/supabase/client'
 import { Badge } from '@/components/atoms/Badge'
-import { completeHabit, uncompleteHabit, deleteHabit } from '@/lib/actions/habits'
 import { HABIT_ICONS, type IconName } from '@/lib/constants/icons'
 import { CompletionModal } from './CompletionModal'
 import type { Database } from '@/types/database-production'
@@ -28,10 +28,14 @@ export function HabitCard({ habit, isCompletedToday, streak = 0 }: HabitCardProp
   const Icon = HABIT_ICONS[(habit.icon as IconName) || 'target']
 
   async function toggleComplete() {
+    const supabase = createClient()
+    const { data: { session } } = await supabase.auth.getSession()
+    if (!session) return
+
     if (completed) {
       setLoading(true)
       try {
-        await uncompleteHabit(habit.id, new Date().toISOString().split('T')[0])
+        await supabase.from('habit_completions').delete().eq('habit_id', habit.id).eq('user_id', session.user.id).gte('completed_at', new Date().toISOString().split('T')[0])
         setCompleted(false)
         toast.success('Habit uncompleted')
       } catch (error) {
@@ -48,7 +52,18 @@ export function HabitCard({ habit, isCompletedToday, streak = 0 }: HabitCardProp
   async function handleComplete(data?: { duration?: number; notes?: string; mood_score?: number }) {
     setLoading(true)
     try {
-      await completeHabit(habit.id, data)
+      const supabase = createClient()
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) return
+
+      await supabase.from('habit_completions').insert({
+        habit_id: habit.id,
+        user_id: session.user.id,
+        completed_at: new Date().toISOString(),
+        duration_minutes: data?.duration,
+        notes: data?.notes,
+        mood_score: data?.mood_score,
+      })
       setCompleted(true)
       toast.success('Great job! 🎉')
       setShowCompletion(false)
@@ -64,8 +79,10 @@ export function HabitCard({ habit, isCompletedToday, streak = 0 }: HabitCardProp
     if (!confirm('Delete this habit? This cannot be undone.')) return
     setLoading(true)
     try {
-      await deleteHabit(habit.id)
+      const supabase = createClient()
+      await supabase.from('habits').delete().eq('id', habit.id)
       toast.success('Habit deleted')
+      window.location.reload()
     } catch (error) {
       console.error('Failed to delete:', error)
       toast.error('Failed to delete habit')
